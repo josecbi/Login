@@ -1,4 +1,5 @@
 import nodemailer from 'nodemailer'
+import * as brevo from '@getbrevo/brevo'
 import 'dotenv/config'
 
 export async function sendVerificationToken(email, token, name = '', tokenType = 'reset', baseUrl) {
@@ -51,6 +52,27 @@ export async function sendVerificationToken(email, token, name = '', tokenType =
     </html>`
 
     try {
+        // Use Brevo API if available (works on Render free tier)
+        if (process.env.BREVO_API_KEY) {
+            const apiInstance = new brevo.TransactionalEmailsApi()
+            apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY)
+
+            const sendSmtpEmail = new brevo.SendSmtpEmail()
+            sendSmtpEmail.sender = { 
+                email: process.env.BREVO_FROM_EMAIL || process.env.EMAIL_USER,
+                name: appName 
+            }
+            sendSmtpEmail.to = [{ email }]
+            sendSmtpEmail.subject = subject
+            sendSmtpEmail.textContent = text
+            sendSmtpEmail.htmlContent = html
+
+            const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
+            console.log('✅ Verification email sent via Brevo API:', result.response.body.messageId)
+            return { messageId: result.response.body.messageId }
+        }
+
+        // Fallback to SMTP (for local development)
         const transporter = nodemailer.createTransport({
             host: process.env.EMAIL_HOST,
             port: process.env.EMAIL_PORT ? Number(process.env.EMAIL_PORT) : 587,
