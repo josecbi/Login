@@ -13,6 +13,8 @@ const app = express()
 const PORT = 8000
 const secret = process.env.LOGIN_SESSION_SECRET
 
+app.set('trust proxy', 1)
+
 const dirname = import.meta.dirname
 
 try {
