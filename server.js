@@ -10,6 +10,7 @@ import dotenv from 'dotenv'
 dotenv.config()
 
 const app = express()
+app.set('trust proxy', 1)
 const PORT = 8000
 const secret = process.env.LOGIN_SESSION_SECRET
 
