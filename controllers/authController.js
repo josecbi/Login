@@ -6,9 +6,9 @@ import { sendVerificationToken } from '../utils/sendVerificationToken.js'
 
 export async function signup(req, res) {
 
-    let { username, email, password, confirmPassword, termsAgree } = req.body
+    let { username, email, password, termsAgree } = req.body
 
-    if (!username || !email || !password || !confirmPassword) {
+    if (!username || !email || !password) {
         return res.status(400).json({ error: 'All field must be filled.' })
     }
 
@@ -23,10 +23,6 @@ export async function signup(req, res) {
 
     if (!validator.isEmail(email)) {
         return res.status(400).json({ error: 'Invalid email.' })
-    }
-
-    if (password !== confirmPassword) {
-        return res.status(400).json({ error: 'Password must be equal to Confim Password.' })
     }
 
     if (!termsAgree) {
