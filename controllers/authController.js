@@ -119,7 +119,7 @@ export async function forgotPassword(req, res) {
             [user.id, email, token, 'reset', expiresAt]
         )
 
-        await sendVerificationToken(email, token, user.username, 'reset')
+        await sendVerificationToken(email, token, user.username, 'reset', `${req.protocol}://${req.get('host')}`)
 
         res.status(200).json({ message: 'Password reset link has been sent to your email.' })
     } catch (error) {

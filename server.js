@@ -20,7 +20,6 @@ try {
     const schema = await fs.readFile(path.join(dirname, 'db', 'schema.sql'), 'utf-8')
     try {
         await db.exec(schema)
-        console.log('✅ Database schema initialized successfully')
     } catch (error) {
         console.error('❌ Error executing schema:', error.message)
     }
@@ -40,7 +39,7 @@ app.use(session({
         httpOnly: true,
         secure: false,
         sameSite: 'lax',
-        maxAge: 30 * 60 * 1000 // 30 minutes of inactivity
+        maxAge: 30 * 60 * 1000
     }
 }))
 

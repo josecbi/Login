@@ -1,9 +1,9 @@
 import nodemailer from 'nodemailer'
 import 'dotenv/config'
 
-export async function sendVerificationToken(email, token, name = '', tokenType = 'reset') {
+export async function sendVerificationToken(email, token, name = '', tokenType = 'reset', baseUrl) {
     const appName = process.env.APP_NAME
-    const baseUrl = process.env.BASE_URL
+    //const baseUrl = process.env.BASE_URL
 
     let verificationUrl
     if (tokenType === 'reset') {
