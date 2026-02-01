@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Express Login</title>
+    <link rel="stylesheet" href="index.css">
+</head>
+
+<body>
+    <div class="card">
+        <form id="login-form">
+            <h1>User Login</h1>
+
+            <div id="message-container" class="message"></div>
+
+            <div class="field">
+                <label for="email">Email</label>
+                <input id="email" name="email" type="email" required autocomplete="email" placeholder="you@example.com"
+                    title="Email is required" />
+            </div>
+
+            <div class="field">
+                <label for="password">Password</label>
+                <input id="password" name="password" type="password" required autocomplete="current-password"
+                    placeholder="input your password" title="Password is required" />
+            </div>
+
+            <div class="options">
+                <label class="checkbox">
+                    <input id="remember" name="remember" type="checkbox" />
+                    Remember me
+                </label>
+                <a class="forgot" href="/forgot-password.html">Forgot Password?</a>
+            </div>
+
+            <div class="actions">
+                <button type="submit">Login</button>
+            </div>
+        </form>
+
+        <div class="actions secondary-action">
+            <a href="/signup.html" class="signup-link">SIGNUP</a>
+        </div>
+    </div>
+</body>
+<script src="login.js" type="module"></script>
+
+</html>
