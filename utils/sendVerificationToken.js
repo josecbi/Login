@@ -57,9 +57,12 @@ export async function sendVerificationToken(email, token, name = '', tokenType =
             const apiInstance = new brevo.TransactionalEmailsApi()
             apiInstance.setApiKey(brevo.TransactionalEmailsApiApiKeys.apiKey, process.env.BREVO_API_KEY)
 
+            // Sanitize email (remove any whitespace/newlines)
+            const fromEmail = (process.env.BREVO_FROM_EMAIL || process.env.EMAIL_USER).trim().replace(/[\r\n]/g, '')
+
             const sendSmtpEmail = new brevo.SendSmtpEmail()
             sendSmtpEmail.sender = {
-                email: process.env.BREVO_FROM_EMAIL || process.env.EMAIL_USER,
+                email: fromEmail,
                 name: appName
             }
             sendSmtpEmail.to = [{ email }]
