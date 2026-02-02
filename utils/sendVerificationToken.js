@@ -33,7 +33,7 @@ export async function sendVerificationToken(email, token, name = '', tokenType =
                                 <h2 style="margin:0 0 8px 0;color:#333333;">Hello ${name || ''}!</h2>
                                 <p style="color:#555555;margin:0 0 16px 0;">Thank you for signing up for <strong>${appName}</strong>. To activate your account, click the button below:</p>
                                 <p style="text-align:center;margin:24px 0;">
-                                    <a href="${verificationUrl}" style="background:#1a73e8;color:#ffffff;padding:12px 20px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:600;">Verify my email</a>
+                                    <a href="${verificationUrl}" style="background:#1a73e8;color:#ffffff;padding:12px 20px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:600;">Verify</a>
                                 </p>
                                 <p style="color:#999999;font-size:13px;margin:16px 0 0 0;">If the button doesn't work, copy and paste this link into your browser:</p>
                                 <p style="word-break:break-all;color:#1a73e8;font-size:14px;margin:8px 0 0 0;">${verificationUrl}</p>
