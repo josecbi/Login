@@ -71,8 +71,8 @@ export async function sendVerificationToken(email, token, name = '', tokenType =
             sendSmtpEmail.htmlContent = html
 
             const result = await apiInstance.sendTransacEmail(sendSmtpEmail)
-            console.log('✅ Verification email sent via Brevo API:', result.response.body.messageId)
-            return { messageId: result.response.body.messageId }
+            console.log('✅ Verification email sent via Brevo API')
+            return { messageId: result?.messageId || result?.id || 'brevo-success' }
         }
 
         // Fallback to SMTP (for local development)
