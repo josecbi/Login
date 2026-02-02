@@ -60,6 +60,7 @@ export async function sendVerificationToken(email, token, name = '', tokenType =
 
             // Sanitize email (remove any whitespace/newlines)
             const fromEmail = (process.env.BREVO_FROM_EMAIL || process.env.EMAIL_USER).trim().replace(/[\r\n]/g, '')
+            console.log(`📤 From: ${fromEmail}, To: ${email}`)
 
             const sendSmtpEmail = new brevo.SendSmtpEmail()
             sendSmtpEmail.sender = {
