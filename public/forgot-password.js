@@ -1,30 +1,17 @@
+import { showMessage, hideMessage } from "../utils/message.js"
+
 const form = document.getElementById('forgot-password-form')
 const messageContainer = document.getElementById('message-container')
 const emailInput = document.getElementById('email')
 
-function showMessage(message, isError = false) {
-    messageContainer.textContent = message
-    messageContainer.className = 'message'
-    if (isError) {
-        messageContainer.classList.add('error')
-    } else {
-        messageContainer.classList.add('success')
-    }
-}
-
-function hideMessage() {
-    messageContainer.className = 'message'
-    messageContainer.textContent = ''
-}
-
 form.addEventListener('submit', async (e) => {
     e.preventDefault()
-    hideMessage()
+    hideMessage(messageContainer)
 
     const email = emailInput.value.trim()
 
     if (!email) {
-        showMessage('Please enter your email address', true)
+        showMessage(messageContainer, 'Please enter your email address', true)
         return
     }
 
@@ -40,16 +27,16 @@ form.addEventListener('submit', async (e) => {
         const data = await res.json()
 
         if (!res.ok) {
-            showMessage(data.error || 'Failed to send reset link', true)
+            showMessage(messageContainer, data.error || 'Failed to send reset link', true)
         } else {
-            showMessage(data.message || 'Check your email for the reset link', false)
+            showMessage(messageContainer, data.message || 'Check your email for the reset link', false)
             form.reset()
             setTimeout(() => {
-                hideMessage()
+                hideMessage(messageContainer)
             }, 4000)
         }
     } catch (error) {
-        showMessage('Failed to process request. Please try again.', true)
+        showMessage(messageContainer, 'Failed to process request. Please try again.', true)
         console.error('Error:', error)
     }
 })

@@ -1,20 +1,7 @@
+import { showMessage, hideMessage } from "../utils/message.js"
+
 const form = document.getElementById('login-form')
 const messageContainer = document.getElementById('message-container')
-
-function showMessage(message, isError = false) {
-    messageContainer.textContent = message
-    messageContainer.className = 'message'
-    if (isError) {
-        messageContainer.classList.add('error')
-    } else {
-        messageContainer.classList.add('success')
-    }
-}
-
-function hideMessage() {
-    messageContainer.className = 'message'
-    messageContainer.textContent = ''
-}
 
 async function login(form) {
     const formData = new FormData(form)
@@ -33,16 +20,16 @@ async function login(form) {
         const data = await res.json()
 
         if (!res.ok) {
-            showMessage(data.error, true)
+            showMessage(messageContainer, data.error, true)
         } else {
-            showMessage(data.message, false)
+            showMessage(messageContainer, data.message, false)
             setTimeout(() => {
-                hideMessage()
+                hideMessage(messageContainer)
             }, 3000)
         }
 
     } catch (error) {
-        showMessage('Failed to login. Please try again.', true)
+        showMessage(messageContainer, 'Failed to login. Please try again.', true)
         console.error('Failed to login', new Error(error))
     }
 }
