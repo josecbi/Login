@@ -2,7 +2,7 @@ import validator from 'validator'
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import { getConnection } from '../db/db.js'
-import { sendVerificationToken } from '../utils/sendVerificationToken.js'
+import { sendVerificationToken } from '../utilsBackEnd/sendVerificationToken.js'
 
 export async function signup(req, res) {
 

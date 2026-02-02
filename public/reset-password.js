@@ -1,4 +1,4 @@
-import { showMessage, hideMessage } from "../utils/message.js"
+import { showMessage, hideMessage } from "./utilsFrontEnd/message.js"
 
 const form = document.getElementById('reset-password-form')
 const messageContainer = document.getElementById('message-container')
