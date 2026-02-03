@@ -9,19 +9,34 @@ export async function sendVerificationToken(email, token, name = '', tokenType =
     let verificationUrl
     if (tokenType === 'reset') {
         verificationUrl = `${baseUrl.replace(/\/$/, '')}/reset-password.html?token=${token}`
+    } else if (tokenType === 'verification') {
+        verificationUrl = `${baseUrl.replace(/\/$/, '')}/verify-email.html?token=${token}`
+    } else {
+        throw new Error('Invalid token type')
     }
 
     const year = new Date().getFullYear()
 
-    const subject = `Confirm your email at ${appName}`
-    const text = `Hello ${name || ''}\n\nThank you for signing up for ${appName}. To activate your account, open the following link:\n\n${verificationUrl}\n\nThis link expires in 1 hour. If you did not request this, you can ignore this email.\n\nRegards,\nThe ${appName} Team`
+    const subject = tokenType === 'verification'
+        ? `Verify your email at ${appName}`
+        : `Reset your password at ${appName}`
+
+    const text = tokenType === 'verification'
+        ? `Hello ${name || ''}\n\nThanks for signing up for ${appName}. Please verify your email by opening this link:\n\n${verificationUrl}\n\nThis link expires in 1 hour. If you did not request this, you can ignore this email.\n\nRegards,\nThe ${appName} Team`
+        : `Hello ${name || ''}\n\nWe received a request to reset your ${appName} password. Open the link below to continue:\n\n${verificationUrl}\n\nThis link expires in 1 hour. If you did not request this, you can ignore this email.\n\nRegards,\nThe ${appName} Team`
+
+    const heading = tokenType === 'verification' ? 'Verify your email' : 'Reset your password'
+    const intro = tokenType === 'verification'
+        ? `Thanks for signing up for <strong>${appName}</strong>. To activate your account, click the button below:`
+        : `We received a request to reset your <strong>${appName}</strong> password. Click the button below to continue:`
+    const buttonLabel = tokenType === 'verification' ? 'Verify email' : 'Reset password'
 
     const html = `<!DOCTYPE html>
     <html lang="en">
     <head>
         <meta charset="utf-8" />
         <meta name="viewport" content="width=device-width,initial-scale=1" />
-        <title>Verify your email</title>
+        <title>${heading}</title>
     </head>
     <body style="font-family:Arial,sans-serif;background:#f6f6f6;margin:0;padding:20px;">
         <table width="100%" cellpadding="0" cellspacing="0" role="presentation">
@@ -31,9 +46,9 @@ export async function sendVerificationToken(email, token, name = '', tokenType =
                         <tr>
                             <td style="padding:24px;text-align:left;">
                                 <h2 style="margin:0 0 8px 0;color:#333333;">Hello ${name || ''}!</h2>
-                                <p style="color:#555555;margin:0 0 16px 0;">Thank you for signing up for <strong>${appName}</strong>. To activate your account, click the button below:</p>
+                                <p style="color:#555555;margin:0 0 16px 0;">${intro}</p>
                                 <p style="text-align:center;margin:24px 0;">
-                                    <a href="${verificationUrl}" style="background:#1a73e8;color:#ffffff;padding:12px 20px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:600;">Verify</a>
+                                    <a href="${verificationUrl}" style="background:#1a73e8;color:#ffffff;padding:12px 20px;border-radius:6px;text-decoration:none;display:inline-block;font-weight:600;">${buttonLabel}</a>
                                 </p>
                                 <p style="color:#999999;font-size:13px;margin:16px 0 0 0;">If the button doesn't work, copy and paste this link into your browser:</p>
                                 <p style="word-break:break-all;color:#1a73e8;font-size:14px;margin:8px 0 0 0;">${verificationUrl}</p>
