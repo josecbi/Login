@@ -1,3 +1,5 @@
+import { showMessage } from "./utilsFrontEnd/message.js"
+
 const signupForm = document.getElementById('signup-form')
 const messageDiv = document.getElementById('message')
 
@@ -20,17 +22,14 @@ async function signup(form) {
         const data = await res.json()
 
         if (!res.ok) {
-            messageDiv.textContent = data.error
-            messageDiv.className = 'message error'
+            showMessage(messageDiv, data.error, true)
         } else {
-            messageDiv.textContent = data.message
-            messageDiv.className = 'message success'
+            showMessage(messageDiv, data.message, false)
             form.reset()
         }
 
     } catch (err) {
-        messageDiv.textContent = `Failed to signup. ${err.message}`
-        messageDiv.className = 'message error'
+        showMessage(messageDiv, `Failed to signup. ${err.message}`, true)
     }
 }
 
