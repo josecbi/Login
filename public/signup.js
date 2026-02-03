@@ -1,4 +1,5 @@
 import { showMessage } from "./utilsFrontEnd/message.js"
+import { getCsrfToken } from "./utilsFrontEnd/csrf.js"
 
 const signupForm = document.getElementById('signup-form')
 const messageDiv = document.getElementById('message')
@@ -6,11 +7,13 @@ const messageDiv = document.getElementById('message')
 async function signup(form) {
     const formData = new FormData(form)
     try {
+        const csrfToken = await getCsrfToken()
         const res = await fetch('/api/auth/signup', {
             method: 'POST',
             credentials: "include",
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfToken
             },
             body: JSON.stringify({
                 username: formData.get('username'),

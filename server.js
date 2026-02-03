@@ -1,5 +1,7 @@
 import express, { json } from 'express'
 import cors from 'cors'
+import cookieParser from 'cookie-parser'
+import { doubleCsrf } from 'csrf-csrf'
 import { authRouter } from './routers/authRouter.js'
 import fs from 'node:fs/promises'
 import path from 'node:path'
@@ -29,9 +31,17 @@ try {
     console.error('❌ The file schema could not be read:', new Error(error))
 }
 
-app.use(cors())
+const allowedOrigins = process.env.CORS_ORIGIN
+    ? process.env.CORS_ORIGIN.split(',').map(origin => origin.trim()).filter(Boolean)
+    : (process.env.BASE_URL ? [process.env.BASE_URL] : [])
+
+app.use(cors({
+    origin: allowedOrigins.length ? allowedOrigins : false,
+    credentials: true
+}))
 
 app.use(express.json())
+app.use(cookieParser())
 
 app.use(session({
     secret: secret,
@@ -39,7 +49,7 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         httpOnly: true,
-        secure: false,
+        secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
         maxAge: 30 * 60 * 1000
     }
@@ -47,7 +57,32 @@ app.use(session({
 
 app.use(express.static('public', { index: 'signup.html' }))
 
-app.use('/api/auth', authRouter)
+const { generateToken, doubleCsrfProtection } = doubleCsrf({
+    getSecret: () => process.env.CSRF_SECRET,
+    cookieName: 'XSRF-TOKEN',
+    cookieOptions: {
+        httpOnly: true,
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production'
+    },
+    size: 64,
+    ignoredMethods: ['GET', 'HEAD', 'OPTIONS'],
+    getTokenFromRequest: (req) => req.headers['x-csrf-token']
+})
+
+app.get('/api/csrf-token', (req, res) => {
+    const csrfToken = generateToken(req, res)
+    res.json({ csrfToken })
+})
+
+app.use('/api/auth', doubleCsrfProtection, authRouter)
+
+app.use((err, req, res, next) => {
+    if (err.code === 'EBADCSRFTOKEN') {
+        return res.status(403).json({ error: 'Invalid CSRF token.' })
+    }
+    next(err)
+})
 
 app.listen(PORT, () => {
     console.log(`Server running on: http://localhost:${PORT}`)

@@ -1,4 +1,5 @@
 import { showMessage, hideMessage } from "./utilsFrontEnd/message.js"
+import { getCsrfToken } from "./utilsFrontEnd/csrf.js"
 
 const form = document.getElementById('forgot-password-form')
 const messageContainer = document.getElementById('message-container')
@@ -16,10 +17,13 @@ form.addEventListener('submit', async (e) => {
     }
 
     try {
+        const csrfToken = await getCsrfToken()
         const res = await fetch('/api/auth/forgot-password', {
             method: 'POST',
+            credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfToken
             },
             body: JSON.stringify({ email })
         })

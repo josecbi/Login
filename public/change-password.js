@@ -1,4 +1,5 @@
 import { showMessage, hideMessage } from "./utilsFrontEnd/message.js"
+import { getCsrfToken } from "./utilsFrontEnd/csrf.js"
 
 const form = document.getElementById('change-password-form')
 const messageContainer = document.getElementById('message-container')
@@ -19,8 +20,8 @@ form.addEventListener('submit', async (e) => {
         return
     }
 
-    if (newPassword.length < 6) {
-        showMessage(messageContainer, 'Password must be at least 6 characters long', true)
+    if (newPassword.length < 8) {
+        showMessage(messageContainer, 'Password must be at least 8 characters long', true)
         return
     }
 
@@ -30,10 +31,13 @@ form.addEventListener('submit', async (e) => {
     }
 
     try {
+        const csrfToken = await getCsrfToken()
         const res = await fetch('/api/auth/change-password', {
             method: 'PUT',
+            credentials: 'include',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'X-CSRF-Token': csrfToken
             },
             // Assume server identifies user via session/cookie or auth header
             body: JSON.stringify({ currentPassword, newPassword })

@@ -29,6 +29,10 @@ export async function signup(req, res) {
         return res.status(400).json({ error: 'You must accept terms and conditions.' })
     }
 
+    if (password.length < 8) {
+        return res.status(400).json({ error: 'Password must be at least 8 characters long.' })
+    }
+
     try {
         const db = await getConnection()
         const alreadyExists = await db.get('SELECT username, email FROM user WHERE username = ? OR email = ?',
@@ -108,11 +112,12 @@ export async function forgotPassword(req, res) {
         }
 
         const token = crypto.randomBytes(32).toString('hex')
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
         const expiresAt = Math.floor(Date.now() / 1000) + (60 * 15)
 
         await db.run(
             'INSERT INTO tokens (user_id, email, token, token_type, expires_at) VALUES (?, ?, ?, ?, ?)',
-            [user.id, email, token, 'reset', expiresAt]
+            [user.id, email, tokenHash, 'reset', expiresAt]
         )
 
         await sendVerificationToken(email, token, user.username, 'reset', `${req.protocol}://${req.get('host')}`)
@@ -147,9 +152,11 @@ export async function resetPassword(req, res) {
         const db = await getConnection()
         const now = Math.floor(Date.now() / 1000)
 
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
+
         const tokenRecord = await db.get(
             'SELECT id, user_id, expires_at FROM tokens WHERE token = ? AND token_type = ? AND used_at IS NULL',
-            [token, 'reset']
+            [tokenHash, 'reset']
         )
 
         if (!tokenRecord) {

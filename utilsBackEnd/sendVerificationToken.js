@@ -51,8 +51,7 @@ export async function sendVerificationToken(email, token, name = '', tokenType =
     </body>
     </html>`
 
-    try {
-        // Use Brevo API if available (works on Render free tier)
+    try {        
         if (process.env.BREVO_API_KEY) {
             console.log('📧 Sending via Brevo API...')
             const apiInstance = new brevo.TransactionalEmailsApi()
