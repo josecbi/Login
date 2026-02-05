@@ -27,12 +27,6 @@ try {
     } catch (error) {
         console.error('❌ Error executing schema:', error.message)
     }
-
-    try {
-        await db.exec('ALTER TABLE user ADD COLUMN email_verified INTEGER DEFAULT 0')
-    } catch (error) {
-        // Ignore if column already exists
-    }
 } catch (error) {
     console.error('❌ The file schema could not be read:', new Error(error))
 }
