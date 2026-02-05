@@ -4,6 +4,11 @@ import { getCsrfToken } from "./utilsFrontEnd/csrf.js"
 const signupForm = document.getElementById('signup-form')
 const messageDiv = document.getElementById('message')
 
+const params = new URLSearchParams(window.location.search)
+if (params.get('verified') === '1') {
+    showMessage(messageDiv, 'User registered.', false)
+}
+
 async function signup(form) {
     const formData = new FormData(form)
     try {

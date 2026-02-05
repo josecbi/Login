@@ -2,7 +2,7 @@ import validator from 'validator'
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import { getConnection } from '../db/db.js'
-import { sendVerificationToken } from '../utilsBackEnd/sendVerificationToken.js'
+import { sendAuthTokenEmail } from '../utilsBackEnd/sendAuthTokenEmail.js'
 
 export async function signup(req, res) {
 
@@ -39,19 +39,38 @@ export async function signup(req, res) {
             [username, email]
         )
 
+        const pendingExists = await db.get(
+            'SELECT id, expires_at FROM pending_users WHERE email = ?',
+            [email]
+        )
+
         if (alreadyExists) {
             return res.status(409).json({
                 error: 'User already exists.'
             })
+        } else if (pendingExists) {
+            const now = Math.floor(Date.now() / 1000)
+            if (pendingExists.expires_at < now) {
+                await db.run('DELETE FROM pending_users WHERE id = ?', [pendingExists.id])
+            } else {
+                return res.status(409).json({
+                    error: 'A verification email was already sent. Please check your email.'
+                })
+            }
         } else {
             const hashedPass = await bcrypt.hash(password, 10)
+            const token = crypto.randomBytes(32).toString('hex')
+            const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
+            const expiresAt = Math.floor(Date.now() / 1000) + (60 * 15)
 
-            const { lastID } = await db.run('INSERT INTO user (username, email, password) VALUES (?, ?, ?)',
-                [username, email, hashedPass]
+            await db.run(
+                'INSERT INTO pending_users (username, email, password, token, expires_at) VALUES (?, ?, ?, ?, ?)',
+                [username, email, hashedPass, tokenHash, expiresAt]
             )
 
-            req.session.userId = lastID
-            res.status(200).json({ message: 'User registered.' })
+            await sendAuthTokenEmail(email, token, username, 'verification', `${req.protocol}://${req.get('host')}`)
+
+            res.status(200).json({ message: 'Verification email sent. Please verify to complete registration.' })
         }
 
     } catch (error) {
@@ -120,7 +139,7 @@ export async function forgotPassword(req, res) {
             [user.id, email, tokenHash, 'reset', expiresAt]
         )
 
-        await sendVerificationToken(email, token, user.username, 'reset', `${req.protocol}://${req.get('host')}`)
+        await sendAuthTokenEmail(email, token, user.username, 'reset', `${req.protocol}://${req.get('host')}`)
 
         res.status(200).json({ message: 'Password reset link has been sent to your email.' })
     } catch (error) {
@@ -182,6 +201,49 @@ export async function resetPassword(req, res) {
         res.status(200).json({ message: 'Password has been reset successfully.' })
     } catch (error) {
         console.error('resetPassword error:', error)
+        res.status(500).json({ error: 'Something went wrong. Please try again.' })
+    }
+}
+
+export async function verifyEmail(req, res) {
+    const { token } = req.body
+
+    if (!token) {
+        return res.status(400).json({ error: 'Token is required.' })
+    }
+
+    try {
+        const db = await getConnection()
+        const now = Math.floor(Date.now() / 1000)
+
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
+
+        const pendingUser = await db.get(
+            'SELECT id, username, email, password, expires_at FROM pending_users WHERE token = ?',
+            [tokenHash]
+        )
+
+        if (!pendingUser) {
+            return res.status(404).json({ error: 'Invalid or already used token.' })
+        }
+
+        if (pendingUser.expires_at < now) {
+            return res.status(401).json({ error: 'Token has expired.' })
+        }
+
+        await db.run(
+            'INSERT INTO user (username, email, password) VALUES (?, ?, ?)',
+            [pendingUser.username, pendingUser.email, pendingUser.password]
+        )
+
+        await db.run(
+            'DELETE FROM pending_users WHERE id = ?',
+            [pendingUser.id]
+        )
+
+        res.status(200).json({ message: 'Account created.' })
+    } catch (error) {
+        console.error('verifyEmail error:', error)
         res.status(500).json({ error: 'Something went wrong. Please try again.' })
     }
 }

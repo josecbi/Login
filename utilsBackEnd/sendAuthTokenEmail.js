@@ -2,7 +2,7 @@ import nodemailer from 'nodemailer'
 import * as brevo from '@getbrevo/brevo'
 import 'dotenv/config'
 
-export async function sendVerificationToken(email, token, name = '', tokenType = 'reset', baseUrl) {
+export async function sendAuthTokenEmail(email, token, name = '', tokenType = 'reset', baseUrl) {
     const appName = process.env.APP_NAME
     //const baseUrl = process.env.BASE_URL
 
@@ -29,7 +29,7 @@ export async function sendVerificationToken(email, token, name = '', tokenType =
     const intro = tokenType === 'verification'
         ? `Thanks for signing up for <strong>${appName}</strong>. To activate your account, click the button below:`
         : `We received a request to reset your <strong>${appName}</strong> password. Click the button below to continue:`
-    const buttonLabel = tokenType === 'verification' ? 'Verify email' : 'Reset password'
+    const buttonLabel = tokenType === 'verification' ? 'Verify' : 'Reset password'
 
     const html = `<!DOCTYPE html>
     <html lang="en">
@@ -116,7 +116,7 @@ export async function sendVerificationToken(email, token, name = '', tokenType =
         console.log('✅ Verification email sent:', info.messageId)
         return info
     } catch (err) {
-        console.error('sendVerificationToken error:', err)
+        console.error('sendAuthTokenEmail error:', err)
         throw err
     }
 }
