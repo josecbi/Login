@@ -3,6 +3,7 @@ import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import { getConnection } from '../db/db.js'
 import { sendAuthTokenEmail } from '../utilsBackEnd/sendAuthTokenEmail.js'
+import { resolveRoleByEmail, syncUserRole } from './roleController.js'
 
 export async function signup(req, res) {
 
@@ -93,7 +94,7 @@ export async function login(req, res) {
 
     try {
         const db = await getConnection()
-        const user = await db.get('SELECT id, username, password FROM user WHERE email = ?', [email])
+        const user = await db.get('SELECT id, username, email, password, role FROM user WHERE email = ?', [email])
 
         // Generic error message for security (don't reveal if user exists)
         if (!user) {
@@ -102,7 +103,9 @@ export async function login(req, res) {
 
         const isCorrectPassword = await bcrypt.compare(password, user.password)
         if (isCorrectPassword) {
+            const effectiveRole = await syncUserRole(db, user.id, user.email, user.role, 'system-login')
             req.session.userId = user.id
+            req.session.role = effectiveRole
             res.status(200).json({ message: `User: ${user.username} logged in successfully!` })
         } else {
             return res.status(401).json({ error: 'Email or password is incorrect.' })
@@ -231,9 +234,16 @@ export async function verifyEmail(req, res) {
             return res.status(401).json({ error: 'Token has expired.' })
         }
 
+        const assignedRole = resolveRoleByEmail(pendingUser.email)
+
+        const result = await db.run(
+            'INSERT INTO user (username, email, password, role) VALUES (?, ?, ?, ?)',
+            [pendingUser.username, pendingUser.email, pendingUser.password, assignedRole]
+        )
+
         await db.run(
-            'INSERT INTO user (username, email, password) VALUES (?, ?, ?)',
-            [pendingUser.username, pendingUser.email, pendingUser.password]
+            'INSERT INTO role_audit (user_id, old_role, new_role, changed_by) VALUES (?, ?, ?, ?)',
+            [result.lastID, null, assignedRole, 'system-verification']
         )
 
         await db.run(
