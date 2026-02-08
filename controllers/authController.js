@@ -81,6 +81,56 @@ export async function signup(req, res) {
 
 }
 
+export async function verifyEmail(req, res) {
+    const { token } = req.body
+
+    if (!token) {
+        return res.status(400).json({ error: 'Token is required.' })
+    }
+
+    try {
+        const db = await getConnection()
+        const now = Math.floor(Date.now() / 1000)
+
+        const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
+
+        const pendingUser = await db.get(
+            'SELECT id, username, email, password, expires_at FROM pending_users WHERE token = ?',
+            [tokenHash]
+        )
+
+        if (!pendingUser) {
+            return res.status(404).json({ error: 'Invalid or already used token.' })
+        }
+
+        if (pendingUser.expires_at < now) {
+            return res.status(401).json({ error: 'Token has expired.' })
+        }
+
+        const assignedRole = resolveRoleByEmail(pendingUser.email)
+
+        const result = await db.run(
+            'INSERT INTO user (username, email, password, role) VALUES (?, ?, ?, ?)',
+            [pendingUser.username, pendingUser.email, pendingUser.password, assignedRole]
+        )
+
+        await db.run(
+            'INSERT INTO role_audit (user_id, old_role, new_role, changed_by) VALUES (?, ?, ?, ?)',
+            [result.lastID, null, assignedRole, 'system']
+        )
+
+        await db.run(
+            'DELETE FROM pending_users WHERE id = ?',
+            [pendingUser.id]
+        )
+
+        res.status(200).json({ message: 'Account created.' })
+    } catch (error) {
+        console.error('verifyEmail error:', error)
+        res.status(500).json({ error: 'Something went wrong. Please try again.' })
+    }
+}
+
 export async function login(req, res) {
     let { email, password } = req.body
 
@@ -208,54 +258,6 @@ export async function resetPassword(req, res) {
     }
 }
 
-export async function verifyEmail(req, res) {
-    const { token } = req.body
 
-    if (!token) {
-        return res.status(400).json({ error: 'Token is required.' })
-    }
-
-    try {
-        const db = await getConnection()
-        const now = Math.floor(Date.now() / 1000)
-
-        const tokenHash = crypto.createHash('sha256').update(token).digest('hex')
-
-        const pendingUser = await db.get(
-            'SELECT id, username, email, password, expires_at FROM pending_users WHERE token = ?',
-            [tokenHash]
-        )
-
-        if (!pendingUser) {
-            return res.status(404).json({ error: 'Invalid or already used token.' })
-        }
-
-        if (pendingUser.expires_at < now) {
-            return res.status(401).json({ error: 'Token has expired.' })
-        }
-
-        const assignedRole = resolveRoleByEmail(pendingUser.email)
-
-        const result = await db.run(
-            'INSERT INTO user (username, email, password, role) VALUES (?, ?, ?, ?)',
-            [pendingUser.username, pendingUser.email, pendingUser.password, assignedRole]
-        )
-
-        await db.run(
-            'INSERT INTO role_audit (user_id, old_role, new_role, changed_by) VALUES (?, ?, ?, ?)',
-            [result.lastID, null, assignedRole, 'system-verification']
-        )
-
-        await db.run(
-            'DELETE FROM pending_users WHERE id = ?',
-            [pendingUser.id]
-        )
-
-        res.status(200).json({ message: 'Account created.' })
-    } catch (error) {
-        console.error('verifyEmail error:', error)
-        res.status(500).json({ error: 'Something went wrong. Please try again.' })
-    }
-}
 
 

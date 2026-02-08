@@ -13,7 +13,7 @@ const loginLimiter = rateLimit({
 })
 
 const forgotPasswordLimiter = rateLimit({
-    windowMs: 60 * 60 * 1000,
+    windowMs: 15 * 60 * 1000,
     max: 3,
     message: { error: 'Too many password reset requests. Please try again later.' },
     standardHeaders: true,
