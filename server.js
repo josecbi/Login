@@ -7,6 +7,7 @@ import fs from 'node:fs/promises'
 import path from 'node:path'
 import { getConnection } from './db/db.js'
 import session from 'express-session'
+import { idleTimeout } from './controllers/idleTimeOut.js'
 import dotenv from 'dotenv'
 
 dotenv.config()
@@ -47,13 +48,23 @@ app.use(session({
     secret: secret,
     resave: false,
     saveUninitialized: false,
+    rolling: true,
     cookie: {
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
         sameSite: 'lax',
-        maxAge: 30 * 60 * 1000
+        maxAge: 60 * 60 * 1000 * 24
     }
 }))
+
+app.use((req, res, next) => {
+    if (req.session) {
+        req.session.lastActivity = Date.now()
+    }
+    next()
+})
+
+app.use(idleTimeout)
 
 app.use(express.static('public', { index: 'signup.html' }))
 
