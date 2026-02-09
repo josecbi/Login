@@ -115,6 +115,7 @@ export async function verifyEmail(req, res) {
         )
 
         req.session.userId = result.lastID
+        req.session.role = assignedRole
 
         await db.run(
             'INSERT INTO role_audit (user_id, old_role, new_role, changed_by) VALUES (?, ?, ?, ?)',
