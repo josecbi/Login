@@ -1,9 +1,7 @@
 const idleTimeoutMs = Number(process.env.IDLE_TIMEOUT)
 
 export const idleTimeout = (req, res, next) => {
-    if (req.headers.accept?.includes('text/event-stream') || req.path === '/api/session/events') {
-        return next()
-    }
+
     if (!req.session) return next()
     if (!req.session.lastActivity) {
         req.session.lastActivity = Date.now()
