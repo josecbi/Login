@@ -57,13 +57,6 @@ app.use(session({
     }
 }))
 
-app.use((req, res, next) => {
-    if (req.session) {
-        req.session.lastActivity = Date.now()
-    }
-    next()
-})
-
 app.use(idleTimeout)
 
 app.use(express.static('public', { index: 'signup.html' }))

@@ -40,7 +40,7 @@ form.addEventListener('submit', async (e) => {
             }, 4000)
         }
     } catch (error) {
-        showMessage(messageContainer, 'Failed to process request. Please try again.', true)
+        showMessage(messageContainer, error?.message || 'Failed to process request. Please try again.', true)
         console.error('Error:', error)
     }
 })

@@ -114,6 +114,8 @@ export async function verifyEmail(req, res) {
             [pendingUser.username, pendingUser.email, pendingUser.password, assignedRole]
         )
 
+        req.session.userId = result.lastID
+
         await db.run(
             'INSERT INTO role_audit (user_id, old_role, new_role, changed_by) VALUES (?, ?, ?, ?)',
             [result.lastID, null, assignedRole, 'system-verification']

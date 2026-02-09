@@ -37,7 +37,7 @@ async function signup(form) {
         }
 
     } catch (err) {
-        showMessage(messageDiv, `Failed to signup. ${err.message}`, true)
+        showMessage(messageDiv, err?.message || 'Failed to signup.', true)
     }
 }
 

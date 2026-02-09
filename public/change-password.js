@@ -55,7 +55,7 @@ form.addEventListener('submit', async (e) => {
             }, 3000)
         }
     } catch (error) {
-        showMessage(messageContainer, 'Failed to change password. Please try again.', true)
+        showMessage(messageContainer, error?.message || 'Failed to change password. Please try again.', true)
         console.error('Error:', error)
     }
 })

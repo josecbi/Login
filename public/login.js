@@ -33,7 +33,7 @@ async function login(form) {
         }
 
     } catch (error) {
-        showMessage(messageContainer, 'Failed to login. Please try again.', true)
+        showMessage(messageContainer, error?.message || 'Failed to login. Please try again.', true)
         console.error('Failed to login', new Error(error))
     }
 }

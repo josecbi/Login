@@ -69,7 +69,7 @@ form.addEventListener('submit', async (e) => {
             }, 2000)
         }
     } catch (error) {
-        showMessage(messageContainer, 'Failed to reset password. Please try again.', true)
+        showMessage(messageContainer, error?.message || 'Failed to reset password. Please try again.', true)
         console.error('Error:', error)
     }
 })

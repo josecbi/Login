@@ -39,7 +39,7 @@ async function verifyEmail() {
         const params = new URLSearchParams({ verified: '1' })
         window.location.href = `/signup.html?${params.toString()}`
     } catch (error) {
-        showMessage(messageContainer, 'Failed to verify email. Please try again.', true)
+        showMessage(messageContainer, error?.message || 'Failed to verify email. Please try again.', true)
         console.error('Error:', error)
     }
 }

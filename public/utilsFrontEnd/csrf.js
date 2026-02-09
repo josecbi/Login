@@ -11,7 +11,13 @@ export async function getCsrfToken() {
     })
 
     if (!res.ok) {
-        throw new Error('Failed to fetch CSRF token')
+        let data = null
+        try {
+            data = await res.json()
+        } catch (err) {
+            data = null
+        }
+        throw new Error(data?.error || 'Failed to fetch CSRF token')
     }
 
     const data = await res.json()
