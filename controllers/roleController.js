@@ -11,14 +11,21 @@ export function resolveRoleByEmail(email) {
 export async function syncUserRole(db, userId, email, currentRole, changedBy = 'system') {
     const expectedRole = resolveRoleByEmail(email)
     if (currentRole !== expectedRole) {
-        await db.run(
-            'UPDATE user SET role = ? WHERE id = ?',
-            [expectedRole, userId]
-        )
-        await db.run(
-            'INSERT INTO role_audit (user_id, old_role, new_role, changed_by) VALUES (?, ?, ?, ?)',
-            [userId, currentRole || null, expectedRole, changedBy]
-        )
+        try {
+            await db.exec('BEGIN')
+            await db.run(
+                'UPDATE user SET role = ? WHERE id = ?',
+                [expectedRole, userId]
+            )
+            await db.run(
+                'INSERT INTO role_audit (user_id, old_role, new_role, changed_by) VALUES (?, ?, ?, ?)',
+                [userId, currentRole || null, expectedRole, changedBy]
+            )
+            await db.exec('COMMIT')
+        } catch (transactionError) {
+            await db.exec('ROLLBACK')
+            throw transactionError
+        }
     }
     return expectedRole
 }

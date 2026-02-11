@@ -109,23 +109,34 @@ export async function verifyEmail(req, res) {
 
         const assignedRole = resolveRoleByEmail(pendingUser.email)
 
-        const result = await db.run(
-            'INSERT INTO user (username, email, password, role) VALUES (?, ?, ?, ?)',
-            [pendingUser.username, pendingUser.email, pendingUser.password, assignedRole]
-        )
+        let result
+
+        try {
+            await db.exec('BEGIN')
+
+            result = await db.run(
+                'INSERT INTO user (username, email, password, role) VALUES (?, ?, ?, ?)',
+                [pendingUser.username, pendingUser.email, pendingUser.password, assignedRole]
+            )
+
+            await db.run(
+                'INSERT INTO role_audit (user_id, old_role, new_role, changed_by) VALUES (?, ?, ?, ?)',
+                [result.lastID, null, assignedRole, 'system-verification']
+            )
+
+            await db.run(
+                'DELETE FROM pending_users WHERE id = ?',
+                [pendingUser.id]
+            )
+
+            await db.exec('COMMIT')
+        } catch (transactionError) {
+            await db.exec('ROLLBACK')
+            throw transactionError
+        }
 
         req.session.userId = result.lastID
         req.session.role = assignedRole
-
-        await db.run(
-            'INSERT INTO role_audit (user_id, old_role, new_role, changed_by) VALUES (?, ?, ?, ?)',
-            [result.lastID, null, assignedRole, 'system-verification']
-        )
-
-        await db.run(
-            'DELETE FROM pending_users WHERE id = ?',
-            [pendingUser.id]
-        )
 
         res.status(200).json({ message: 'Account created.' })
     } catch (error) {
@@ -244,15 +255,24 @@ export async function resetPassword(req, res) {
 
         const hashedPassword = await bcrypt.hash(newPassword, 10)
 
-        await db.run(
-            'UPDATE user SET password = ? WHERE id = ?',
-            [hashedPassword, tokenRecord.user_id]
-        )
+        try {
+            await db.exec('BEGIN')
 
-        await db.run(
-            'UPDATE tokens SET used_at = ? WHERE id = ?',
-            [Math.floor(Date.now() / 1000), tokenRecord.id]
-        )
+            await db.run(
+                'UPDATE user SET password = ? WHERE id = ?',
+                [hashedPassword, tokenRecord.user_id]
+            )
+
+            await db.run(
+                'UPDATE tokens SET used_at = ? WHERE id = ?',
+                [Math.floor(Date.now() / 1000), tokenRecord.id]
+            )
+
+            await db.exec('COMMIT')
+        } catch (transactionError) {
+            await db.exec('ROLLBACK')
+            throw transactionError
+        }
 
         res.status(200).json({ message: 'Password has been reset successfully.' })
     } catch (error) {
