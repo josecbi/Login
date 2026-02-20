@@ -36,7 +36,7 @@ export async function signup(req, res) {
 
     try {
         const db = await getConnection()
-        const alreadyExists = await db.get('SELECT username, email FROM user WHERE username = ? OR email = ?',
+        const alreadyExists = await db.get('SELECT username, email FROM user WHERE username = ? AND email = ?',
             [username, email]
         )
 

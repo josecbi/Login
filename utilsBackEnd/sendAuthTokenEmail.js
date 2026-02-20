@@ -22,8 +22,8 @@ export async function sendAuthTokenEmail(email, token, name = '', tokenType = 'r
         : `Reset your password at ${appName}`
 
     const text = tokenType === 'verification'
-        ? `Hello ${name || ''}\n\nThanks for signing up for ${appName}. Please verify your email by opening this link:\n\n${verificationUrl}\n\nThis link expires in 1 hour. If you did not request this, you can ignore this email.\n\nRegards,\nThe ${appName} Team`
-        : `Hello ${name || ''}\n\nWe received a request to reset your ${appName} password. Open the link below to continue:\n\n${verificationUrl}\n\nThis link expires in 1 hour. If you did not request this, you can ignore this email.\n\nRegards,\nThe ${appName} Team`
+        ? `Hello ${name || ''}\n\nThanks for signing up for ${appName}. Please verify your email by opening this link:\n\n${verificationUrl}\n\nThis link expires in 15 minutes. If you did not request this, you can ignore this email.\n\nRegards,\nThe ${appName} Team`
+        : `Hello ${name || ''}\n\nWe received a request to reset your ${appName} password. Open the link below to continue:\n\n${verificationUrl}\n\nThis link expires in 15 minutes. If you did not request this, you can ignore this email.\n\nRegards,\nThe ${appName} Team`
 
     const heading = tokenType === 'verification' ? 'Verify your email' : 'Reset your password'
     const intro = tokenType === 'verification'
@@ -53,7 +53,7 @@ export async function sendAuthTokenEmail(email, token, name = '', tokenType = 'r
                                 <p style="color:#999999;font-size:13px;margin:16px 0 0 0;">If the button doesn't work, copy and paste this link into your browser:</p>
                                 <p style="word-break:break-all;color:#1a73e8;font-size:14px;margin:8px 0 0 0;">${verificationUrl}</p>
                                 <hr style="border:none;border-top:1px solid #eee;margin:20px 0;" />
-                                <p style="color:#999999;font-size:12px;margin:0;">This link expires in 1 hour. If you did not request this email, you can ignore it.</p>
+                                <p style="color:#999999;font-size:12px;margin:0;">This link expires in 15 minutes. If you did not request this email, you can ignore it.</p>
                             </td>
                         </tr>
                         <tr>
@@ -66,7 +66,7 @@ export async function sendAuthTokenEmail(email, token, name = '', tokenType = 'r
     </body>
     </html>`
 
-    try {        
+    try {
         if (process.env.BREVO_API_KEY) {
             console.log('📧 Sending via Brevo API...')
             const apiInstance = new brevo.TransactionalEmailsApi()

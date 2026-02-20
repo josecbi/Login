@@ -6,4 +6,3 @@ package-lock.json
 .DS_Store
 logDataBase.js
 checkTables.js
-PASSWORD_RESET_LOGIC.md
