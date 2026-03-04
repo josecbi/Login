@@ -25,6 +25,26 @@ form.addEventListener('submit', async (e) => {
         return
     }
 
+    if (!/[A-Za-z]/.test(newPassword)) {
+        showMessage(messageContainer, 'Password must contain at least one letter', true)
+        return
+    }
+
+    if (!/[A-Z]/.test(newPassword)) {
+        showMessage(messageContainer, 'Password must contain at least one uppercase letter', true)
+        return
+    }
+
+    if (!/[0-9]/.test(newPassword)) {
+        showMessage(messageContainer, 'Password must contain at least one number', true)
+        return
+    }
+
+    if (!/[^A-Za-z0-9\s]/.test(newPassword)) {
+        showMessage(messageContainer, 'Password must contain at least one special character', true)
+        return
+    }
+
     if (newPassword !== confirmPassword) {
         showMessage(messageContainer, 'Passwords do not match', true)
         return

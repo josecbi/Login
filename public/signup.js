@@ -11,6 +11,33 @@ if (params.get('verified') === '1') {
 
 async function signup(form) {
     const formData = new FormData(form)
+    const password = String(formData.get('password') || '')
+
+    if (password.length < 8) {
+        showMessage(messageDiv, 'Password must be at least 8 characters long', true)
+        return
+    }
+
+    if (!/[A-Za-z]/.test(password)) {
+        showMessage(messageDiv, 'Password must contain at least one letter', true)
+        return
+    }
+
+    if (!/[A-Z]/.test(password)) {
+        showMessage(messageDiv, 'Password must contain at least one uppercase letter', true)
+        return
+    }
+
+    if (!/[0-9]/.test(password)) {
+        showMessage(messageDiv, 'Password must contain at least one number', true)
+        return
+    }
+
+    if (!/[^A-Za-z0-9\s]/.test(password)) {
+        showMessage(messageDiv, 'Password must contain at least one special character', true)
+        return
+    }
+
     try {
         const csrfToken = await getCsrfToken()
         const res = await fetch('/api/auth/signup', {
@@ -23,7 +50,7 @@ async function signup(form) {
             body: JSON.stringify({
                 username: formData.get('username'),
                 email: formData.get('email'),
-                password: formData.get('password'),
+                password,
                 termsAgree: formData.get('agree')
             })
         })

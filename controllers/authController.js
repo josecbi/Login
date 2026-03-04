@@ -34,6 +34,22 @@ export async function signup(req, res) {
         return res.status(400).json({ error: 'Password must be at least 8 characters long.' })
     }
 
+    if (!/[A-Za-z]/.test(password)) {
+        return res.status(400).json({ error: 'Password must contain at least one letter.' })
+    }
+
+    if (!/[A-Z]/.test(password)) {
+        return res.status(400).json({ error: 'Password must contain at least one uppercase letter.' })
+    }
+
+    if (!/[0-9]/.test(password)) {
+        return res.status(400).json({ error: 'Password must contain at least one number.' })
+    }
+
+    if (!/[^A-Za-z0-9\s]/.test(password)) {
+        return res.status(400).json({ error: 'Password must contain at least one special character.' })
+    }
+
     try {
         const db = await getConnection()
         const alreadyExists = await db.get('SELECT username, email FROM user WHERE username = ? AND email = ?',
@@ -232,6 +248,22 @@ export async function resetPassword(req, res) {
 
     if (newPassword.length < 8) {
         return res.status(400).json({ error: 'Password must be at least 8 characters long.' })
+    }
+
+    if (!/[A-Za-z]/.test(newPassword)) {
+        return res.status(400).json({ error: 'Password must contain at least one letter.' })
+    }
+
+    if (!/[A-Z]/.test(newPassword)) {
+        return res.status(400).json({ error: 'Password must contain at least one uppercase letter.' })
+    }
+
+    if (!/[0-9]/.test(newPassword)) {
+        return res.status(400).json({ error: 'Password must contain at least one number.' })
+    }
+
+    if (!/[^A-Za-z0-9\s]/.test(newPassword)) {
+        return res.status(400).json({ error: 'Password must contain at least one special character.' })
     }
 
     try {
