@@ -13,7 +13,7 @@
         "nodemailer": "^7.0.13",
         "sqlite": "^5.1.1",
         "sqlite3": "^5.1.7",
-        "validator": "^13.15.26"
+        "zod": "^3.25.76"
     },
     "name": "express-login",
     "version": "1.0.0",

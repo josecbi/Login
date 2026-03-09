@@ -1,6 +1,14 @@
 import express from 'express'
 import rateLimit from 'express-rate-limit'
 import { signup, login, forgotPassword, resetPassword, verifyEmail } from '../controllers/authController.js'
+import {
+    signupBodySchema,
+    verifyEmailBodySchema,
+    loginBodySchema,
+    forgotPasswordBodySchema,
+    resetPasswordBodySchema
+} from '../utilsBackEnd/authValidationSchemas.js'
+import { validateBody } from '../utilsBackEnd/validateBody.js'
 
 export const authRouter = express.Router()
 
@@ -20,8 +28,8 @@ const forgotPasswordLimiter = rateLimit({
     legacyHeaders: false,
 })
 
-authRouter.post('/signup', signup)
-authRouter.post('/login', loginLimiter, login)
-authRouter.post('/forgot-password', forgotPasswordLimiter, forgotPassword)
-authRouter.post('/reset-password', resetPassword)
-authRouter.post('/verify-email', verifyEmail)
+authRouter.post('/signup', validateBody(signupBodySchema), signup)
+authRouter.post('/login', loginLimiter, validateBody(loginBodySchema), login)
+authRouter.post('/forgot-password', forgotPasswordLimiter, validateBody(forgotPasswordBodySchema), forgotPassword)
+authRouter.post('/reset-password', validateBody(resetPasswordBodySchema), resetPassword)
+authRouter.post('/verify-email', validateBody(verifyEmailBodySchema), verifyEmail)

@@ -1,4 +1,3 @@
-import validator from 'validator'
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import { getConnection } from '../db/db.js'
@@ -6,49 +5,7 @@ import { sendAuthTokenEmail } from '../utilsBackEnd/sendAuthTokenEmail.js'
 import { resolveRoleByEmail, syncUserRole } from './roleController.js'
 
 export async function signup(req, res) {
-
-    let { username, email, password, termsAgree } = req.body
-
-    if (!username || !email || !password) {
-        return res.status(400).json({ error: 'All field must be filled.' })
-    }
-
-    username = username.trim()
-    email = email.trim()
-
-    if (!/^[a-zA-Z0-9_-]{1,20}$/.test(username)) {
-        return res.status(400).json(
-            { error: 'Username must be 1–20 characters, using letters, numbers, _ or -.' }
-        )
-    }
-
-    if (!validator.isEmail(email)) {
-        return res.status(400).json({ error: 'Invalid email.' })
-    }
-
-    if (!termsAgree) {
-        return res.status(400).json({ error: 'You must accept terms and conditions.' })
-    }
-
-    if (password.length < 8) {
-        return res.status(400).json({ error: 'Password must be at least 8 characters long.' })
-    }
-
-    if (!/[A-Za-z]/.test(password)) {
-        return res.status(400).json({ error: 'Password must contain at least one letter.' })
-    }
-
-    if (!/[A-Z]/.test(password)) {
-        return res.status(400).json({ error: 'Password must contain at least one uppercase letter.' })
-    }
-
-    if (!/[0-9]/.test(password)) {
-        return res.status(400).json({ error: 'Password must contain at least one number.' })
-    }
-
-    if (!/[^A-Za-z0-9\s]/.test(password)) {
-        return res.status(400).json({ error: 'Password must contain at least one special character.' })
-    }
+    const { username, email, password } = req.validatedBody
 
     try {
         const db = await getConnection()
@@ -98,11 +55,7 @@ export async function signup(req, res) {
 }
 
 export async function verifyEmail(req, res) {
-    const { token } = req.body
-
-    if (!token) {
-        return res.status(400).json({ error: 'Token is required.' })
-    }
+    const { token } = req.validatedBody
 
     try {
         const db = await getConnection()
@@ -162,15 +115,7 @@ export async function verifyEmail(req, res) {
 }
 
 export async function login(req, res) {
-    let { email, password } = req.body
-
-    if (!email || !password) {
-        return res.status(400).json({ error: 'All field must be filled.' })
-    }
-
-    if (!validator.isEmail(email)) {
-        return res.status(400).json({ error: 'Invalid email.' })
-    }
+    const { email, password } = req.validatedBody
 
     try {
         const db = await getConnection()
@@ -198,11 +143,7 @@ export async function login(req, res) {
 }
 
 export async function forgotPassword(req, res) {
-    const { email } = req.body
-
-    if (!email || !validator.isEmail(email)) {
-        return res.status(400).json({ error: 'Invalid email.' })
-    }
+    const { email } = req.validatedBody
 
     try {
         const db = await getConnection()
@@ -232,39 +173,7 @@ export async function forgotPassword(req, res) {
 }
 
 export async function resetPassword(req, res) {
-    const { token, newPassword, confirmPassword } = req.body
-
-    if (!token) {
-        return res.status(400).json({ error: 'Token is required.' })
-    }
-
-    if (!newPassword || !confirmPassword) {
-        return res.status(400).json({ error: 'All fields are required.' })
-    }
-
-    if (newPassword !== confirmPassword) {
-        return res.status(400).json({ error: 'Passwords do not match.' })
-    }
-
-    if (newPassword.length < 8) {
-        return res.status(400).json({ error: 'Password must be at least 8 characters long.' })
-    }
-
-    if (!/[A-Za-z]/.test(newPassword)) {
-        return res.status(400).json({ error: 'Password must contain at least one letter.' })
-    }
-
-    if (!/[A-Z]/.test(newPassword)) {
-        return res.status(400).json({ error: 'Password must contain at least one uppercase letter.' })
-    }
-
-    if (!/[0-9]/.test(newPassword)) {
-        return res.status(400).json({ error: 'Password must contain at least one number.' })
-    }
-
-    if (!/[^A-Za-z0-9\s]/.test(newPassword)) {
-        return res.status(400).json({ error: 'Password must contain at least one special character.' })
-    }
+    const { token, newPassword } = req.validatedBody
 
     try {
         const db = await getConnection()
