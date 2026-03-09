@@ -102,7 +102,7 @@ export const resetPasswordBodySchema = z.object({
         ctx.addIssue({
             code: z.ZodIssueCode.custom,
             path: ['confirmPassword'],
-            message: 'Passwords do not match.'
+            message: 'Passwords do not match with Confirm password.'
         })
         return
     }
