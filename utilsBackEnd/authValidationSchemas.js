@@ -99,17 +99,15 @@ export const resetPasswordBodySchema = z.object({
     confirmPassword: requiredString(RESET_REQUIRED_MESSAGE)
 }).superRefine((value, ctx) => {
     if (value.newPassword !== value.confirmPassword) {
-        const password = value.newPassword
-        if (value.confirmPassword !== password) {
-            ctx.addIssue({
-                code: z.ZodIssueCode.custom,
-                path: ['confirmPassword'],
-                message: 'Confirm password must match password.'
+        ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ['confirmPassword'],
+            message: 'Passwords do not match with Confirm password.'
         })
         return
     }
 
-        addPasswordComplexityIssue(password, ctx, ['newPassword'])
+    addPasswordComplexityIssue(value.newPassword, ctx, ['newPassword'])
 })
 
 export function getFirstValidationError(error) {
