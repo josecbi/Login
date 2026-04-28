@@ -7,8 +7,8 @@ import {
     loginBodySchema,
     forgotPasswordBodySchema,
     resetPasswordBodySchema
-} from '../utilsBackEnd/authValidationSchemas.js'
-import { validateBody } from '../utilsBackEnd/validateBody.js'
+} from '../utils/authValidationSchemas.js'
+import { validateBody } from '../utils/validateBody.js'
 
 export const authRouter = express.Router()
 

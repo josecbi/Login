@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 import crypto from 'crypto'
 import { getConnection } from '../db/db.js'
-import { sendAuthTokenEmail } from '../utilsBackEnd/sendAuthTokenEmail.js'
+import { sendAuthTokenEmail } from '../utils/sendAuthTokenEmail.js'
 import { resolveRoleByEmail, syncUserRole } from './roleController.js'
 
 export async function signup(req, res) {

@@ -1,5 +1,5 @@
-import { showMessage } from "./utilsFrontEnd/message.js"
-import { getCsrfToken } from "./utilsFrontEnd/csrf.js"
+import { showMessage } from "./utils/message.js"
+import { getCsrfToken } from "./utils/csrf.js"
 
 const signupForm = document.getElementById('signup-form')
 const messageDiv = document.getElementById('message')

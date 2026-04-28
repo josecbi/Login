@@ -1,5 +1,5 @@
-import { showMessage, hideMessage } from "./utilsFrontEnd/message.js"
-import { getCsrfToken } from "./utilsFrontEnd/csrf.js"
+import { showMessage, hideMessage } from "./utils/message.js"
+import { getCsrfToken } from "./utils/csrf.js"
 
 const form = document.getElementById('login-form')
 const messageContainer = document.getElementById('message-container')
